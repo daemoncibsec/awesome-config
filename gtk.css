@@ -1,1 +1,15 @@
-.window-frame { box-shadow: 0 0 0 0px @wm_border; margin: 0px; }﻿
+.window-frame, .window-frame:backdrop,
+window.csd, window.solid-csd, window.maximized,
+window.csd decoration, window.solid-csd decoration {
+    border: none;
+    box-shadow: none;
+    margin: 0;
+    padding: 0;
+}
+
+headerbar, .titlebar {
+    border: none;
+    box-shadow: none;
+    margin: 0;
+    padding: 0;
+}

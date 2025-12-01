@@ -513,7 +513,9 @@ globalkeys = mytable.join(
     awful.key({ modkey, "Ctrl" }, "b", function () awful.spawn(browser) end,
               {description = "run browser", group = "launcher"}),
     awful.key({}, "Print", function() awful.spawn("flameshot gui") end,
-              {description = "destroy all notifications", group = "hotkeys"}),
+              {description = "take a screenshot", group = "hotkeys"}),
+    awful.key({ modkey, "Ctrl" }, "f", function () awful.spawn.with_shell("thunar") end,
+              {description = "open file browser", group = "launcher"}),
 
     -- Default
     --[[ Menubar
