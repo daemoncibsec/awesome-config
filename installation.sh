@@ -2,6 +2,32 @@
 
 user=$1
 
+spin() {
+	local spinner=('⠋' '⠙' '⠹' '⠸' '⠼' '⠴' '⠦' '⠧')
+	local mensaje="${1:-Procesando...}"
+	shift
+
+	"$@" &>/dev/null &
+	local pid=$!
+
+	while kill -0 $pid 2>/dev/null; do
+		for f in "${spinner[@]}"; do
+			printf "\r $f $mensaje"
+			sleep 0.1
+		done
+	done
+
+	wait $pid
+	if [ $? -eq 0 ]; then
+		printf "\r ✓ $mensaje\n"
+	else
+		printf "\r ✗ Error: $mensaje"
+	fi
+}
+
+# Example:
+# spin "Actualizando repositorios..." sudo apt update
+
 check_user () {
 	if [[ -d "/home/$user" ]]; then
 		return 0
@@ -12,19 +38,17 @@ check_user () {
 }
 
 update_sys() {
-	echo -e "\nBeginning system update."
-	sudo apt update
+	spin "Beginning system update" sudo apt update
 
 	if [[ $? -eq 0 ]]; then
-		echo -e "\nBeginning external repositories installation"
-		sudo apt install extrepo -y && sudo extrepo enable librewolf
+		spin "Beginning external repositories installation - May take around 20 minutes" sudo apt install extrepo -y && sudo extrepo enable librewolf
 	else
 		return 1
 	fi
 
 	if [[ $? -eq 0 ]]; then
-		echo -e "\nEnabled 'librewolf' package in the external repositories for installation.\nApplying changes."
-		sudo apt update
+		echo "   Enabled 'librewolf' package in the external repositories for installation"
+		spin "Applying changes" sudo apt update
 	else
 		return 1
 	fi
@@ -37,8 +61,7 @@ update_sys() {
 }
 
 install_packages() {
-	echo -e "\nInstalling packages (this may take a while, please wait)..."
-	sudo apt install awesome librewolf tilix kitty picom neovim flameshot thunar ranger gcc python3 fzf btop -y
+	spin "Installing packages - Will definitely take some time, around 1 hour" sudo apt install awesome librewolf tilix kitty picom neovim flameshot thunar ranger gcc python3 fzf btop picom -y
 	if [[ $? -ne 0 ]]; then		
 		return 1
 	fi
@@ -48,13 +71,13 @@ install_packages() {
 
 copy_configurations() {
 	echo -e "\nConfiguring Awesome WM..."
-	mkdir /home/$user/.config/awesome &>/dev/null
-	cp -r awesome /home/$user/.config/awesome
+	mkdir -p /home/$user/.config/awesome &>/dev/null
+	cp -r awesome/* /home/$user/.config/awesome
 
 	if [[ $? -eq 0 ]]; then
-		echo -e "\nConfiguring Kitty Terminal..."
-		mkdir /home/$user/.config/kitty &>/dev/null
-		cp -r kitty /home/$user/.config/kitty
+		echo -e "Configuring Kitty Terminal..."
+		mkdir -p /home/$user/.config/kitty &>/dev/null
+		cp -r kitty/* /home/$user/.config/kitty
 	else
 		return 1
 	fi
@@ -76,15 +99,15 @@ copy_configurations() {
 
 	if [[ $? -eq 0 ]]; then
 		echo -e "Configuring NeoVim Text Editor..."
-		mkdir /home/$user/.config/nvim &>/dev/null
-		cp -r nvim /home/$user/.config/nvim
+		mkdir -p /home/$user/.config/nvim &>/dev/null
+		cp -r nvim/* /home/$user/.config/nvim
 	else
 		return 1
 	fi
 
 	if [[ $? -eq 0 ]]; then
 		echo -e "Configuring Thunar File Explorer..."
-		mkdir /home/$user/.themes/ &>/dev/null
+		mkdir -p /home/$user/.themes/ &>/dev/null
 		cp -r themes/* /home/$user/.themes
 	else
 		return 1
@@ -92,7 +115,7 @@ copy_configurations() {
 
 	if [[ $? -eq 0 ]]; then
 		echo -e "Configuring Btop process manager..."
-		cp -r btop /home/$user/.config/btop
+		cp -r btop/* /home/$user/.config/btop
 	else
 		return 1
 	fi
@@ -133,8 +156,14 @@ main() {
 					install_packages
 					if [[ $? -eq 0 ]]; then
 						copy_configurations
+						if [[ $? -eq 0 ]]; then
+							chown -R $user:$user /home/$user
+							echo -e "\nInstallation completed. Make sure to restart so the changes can apply."
+						else
+							echo -e "\nAn error occured while copying configurations. Aborting."
+						fi
 					else
-						echo -e "\nAn error occured while copying configurations. Aborting."
+						echo -e "\nPackages installation error. Aborting."
 						return 1
 					fi
 				else
@@ -149,8 +178,6 @@ main() {
 			return 1
 		fi
 	fi
-	chown -R $user:$user /home/$user
-	echo -e "\nInstallation completed. Make sure to restart so the changes can apply."
 	return 0
 }
 

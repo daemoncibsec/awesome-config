@@ -229,7 +229,7 @@ screen.connect_signal("arrange", function (s)
     for _, c in pairs(s.clients) do
         if only_one and not c.floating or c.maximized or c.fullscreen then
             c.border_width = 0
-       else
+	else
             c.border_width = beautiful.border_width
         end
     end
