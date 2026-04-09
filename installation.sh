@@ -114,6 +114,7 @@ main() {
 	if [[ $1 == "-h" || $1 == "" ]]; then
 		echo -e "You must specify the user you want to install the desktop configuration to."
 		return 0
+	fi
 	if [[ $EUID -eq 0 ]]; then
 		check_user
 		if [[ $EUID -eq 0 ]]; then
