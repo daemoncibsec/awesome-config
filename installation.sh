@@ -1,5 +1,14 @@
 #!/bin/bash
 
+check_user () {
+	home_dir=$(ls /home | grep $1)
+	if [[ $1 == home_dir ]]; then
+		return 0
+	else
+		return 1
+	fi
+}
+
 update_sys() {
 	echo -e "\nBeginning system update."
 	sudo apt update
