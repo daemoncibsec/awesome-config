@@ -133,41 +133,59 @@ theme.mail = lain.widget.imap({
 })
 --]]
 
--- MPD
-local musicplr = awful.util.terminal .. " -title Music -e ncmpcpp"
-local mpdicon = wibox.widget.imagebox(theme.widget_music)
-mpdicon:buttons(my_table.join(
-    awful.button({ "Mod4" }, 1, function () awful.spawn(musicplr) end),
+-- PlayerCTL Music
+local musicplr = awful.util.terminal .. " -title Music"
+local plcicon = wibox.widget.imagebox(theme.widget_music)
+
+plcicon:buttons(my_table.join(
+    awful.button({ "Mod4" }, 1, function ()
+        awful.spawn("playerctl play-pause")
+    end),
+
     awful.button({ }, 1, function ()
-        os.execute("mpc prev")
-        theme.mpd.update()
+        awful.spawn("playerctl previous")
     end),
+
     awful.button({ }, 2, function ()
-        os.execute("mpc toggle")
-        theme.mpd.update()
+        awful.spawn("playerctl play-pause")
     end),
+
     awful.button({ }, 3, function ()
-        os.execute("mpc next")
-        theme.mpd.update()
-    end)))
-theme.mpd = lain.widget.mpd({
-    settings = function()
-        if mpd_now.state == "play" then
-            artist = " " .. mpd_now.artist .. " "
-            title  = mpd_now.title  .. " "
-            mpdicon:set_image(theme.widget_music_on)
-        elseif mpd_now.state == "pause" then
-            artist = " mpd "
-            title  = "paused "
+        awful.spawn("playerctl next")
+    end)
+))
+
+theme.player = awful.widget.watch(
+    'playerctl metadata --format "{{status}}|{{artist}}|{{title}}" 2>/dev/null',
+    2,
+    function(widget, stdout)
+
+        local status, artist, title = stdout:match("([^|]*)|([^|]*)|([^\n]*)")
+
+        if status == "Playing" then
+            artist = " " .. (artist or "") .. " "
+            title  = (title or "") .. " "
+            plcicon:set_image(theme.widget_music_on)
+
+        elseif status == "Paused" then
+            artist = " paused "
+            title  = ""
+            plcicon:set_image(theme.widget_music)
+
         else
             artist = ""
-            title  = ""
-            mpdicon:set_image(theme.widget_music)
+            title = ""
+            plcicon:set_image(theme.widget_music)
         end
 
-        widget:set_markup(markup.font(theme.font, markup("#EA6F81", artist) .. title))
+        widget:set_markup(
+            markup.font(
+                theme.font,
+                markup("#EA6F81", artist) .. title
+            )
+        )
     end
-})
+)
 
 -- MEM
 local memicon = wibox.widget.imagebox(theme.widget_mem)
@@ -321,8 +339,8 @@ function theme.at_screen_connect(s)
             keyboardlayout,
             spr,
             arrl_ld,
-            wibox.container.background(mpdicon, theme.bg_focus),
-            wibox.container.background(theme.mpd.widget, theme.bg_focus),
+	    wibox.container.background(plcicon, theme.bg_focus),
+	    wibox.container.background(theme.player, theme.bg_focus),
             arrl_dl,
             volicon,
             theme.volume.widget,

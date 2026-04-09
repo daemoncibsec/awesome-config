@@ -111,4 +111,17 @@ if ! shopt -oq posix; then
     . /etc/bash_completion
   fi
 fi
-PROMPT_COMMAND='PS1_CMD1=$(if [[ -n "$target" ]]; then echo "$target"; else echo "[TARGET]"; fi)'; PS1='\[\e[8;5;203;1m\]\u@\h\[\e[0m\] - \[\e[8;5;203;1m\]\W\[\e[0m\] - \[\e[8;5;203;1m\]${PS1_CMD1}\n\[\e[0m\]❱❱ '
+export PATH="$HOME/zig-linux-x86_64-0.12.0:$PATH"
+export LIBVIRT_DEFAULT_URI='qemu:///system'
+
+if command -v fzf >/dev/null 2>&1; then
+    bind -x '"\C-r": __fzf_history__'
+    __fzf_history__() {
+        local selected
+	selected=$(fc -rl 1 | cut -d ' ' -f 2- | sort -ru | fzf --style full --exact --tac --no-sort --query "$READLINE_LINE" | sed 's/^[ ]*[0-9]*[ ]*//')
+        READLINE_LINE="$selected"
+        READLINE_POINT=${#READLINE_LINE}
+    }
+fi
+
+PROMPT_COMMAND='PS1_CMD1=$(if [[ -n "$target" ]]; then echo "$target"; else echo "[TARGET]"; fi)'; PS1='\[\e[39;5;203;1m\]\u@\h\[\e[0m\] - \[\e[39;5;203;1m\]\W\[\e[0m\] - \[\e[39;5;203;1m\]${PS1_CMD1}\n\[\e[0m\]❱❱ '
