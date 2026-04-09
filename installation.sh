@@ -1,11 +1,12 @@
 #!/bin/bash
 
+user=$1
+
 check_user () {
-	home_dir=$(ls /home | grep $1)
-	if [[ $1 == home_dir ]]; then
+	if [[ -d "/home/$user" ]]; then
 		return 0
 	else
-		echo -e "The home directory for the user '$user' does not exist."
+		echo -e "\nThe home directory for the user '$user' does not exist.\n"
 		return 1
 	fi
 }
@@ -46,7 +47,6 @@ install_packages() {
 }
 
 copy_configurations() {
-	user=$1
 	echo -e "\nConfiguring Awesome WM..."
 	mkdir /home/$user/.config/awesome &>/dev/null
 	cp -r awesome /home/$user/.config/awesome
@@ -120,37 +120,38 @@ copy_configurations() {
 }
 
 main() {
-	user=$1
-	if [[ $1 == "-h" || $1 -eq none ]]; then
+	if [[ "$user" == "-h" || -z "$1" ]]; then
 		echo -e "You must specify the user you want to install the desktop configuration to.\n"
 		return 0
-	fi
-	if [[ $EUID -eq 0 ]]; then
-		check_user
-		# You must create this function
+	else
+		echo -e "\nProceeding with the installation of the configuration for the user '$user'."
 		if [[ $EUID -eq 0 ]]; then
-			update_sys
+			check_user
 			if [[ $? -eq 0 ]]; then
-				install_packages
+				update_sys
 				if [[ $? -eq 0 ]]; then
-					copy_configurations
+					install_packages
+					if [[ $? -eq 0 ]]; then
+						copy_configurations
+					else
+						echo -e "\nAn error occured while copying configurations. Aborting."
+						return 1
+					fi
 				else
-					echo -e "\nAn error occured while copying configurations. Aborting."
+					echo -e "\nCouldn't update system. Aborting installation.\n"
 					return 1
 				fi
 			else
-				echo -e "\nCouldn't update system. Aborting installation."
 				return 1
 			fi
-			chown -R $user:$user /home/$user
-			echo -e "\nInstallation completed. Make sure to restart so the changes can apply."
 		else
-			echo -e "\nYou must run this script with root privileges."
+			echo -e "\nYou must run this script with root privileges.\n"
 			return 1
 		fi
-	else
-		return 1
 	fi
+	chown -R $user:$user /home/$user
+	echo -e "\nInstallation completed. Make sure to restart so the changes can apply."
+	return 0
 }
 
-main
+main "$@"
