@@ -1,18 +1,18 @@
 #!/bin/bash
 
 update_sys() {
-	echo -E "\nBeginning system update."
+	echo -e "\nBeginning system update."
 	sudo apt update
 
 	if [[ $? -eq 0 ]]; then
-		echo -E "\nBeninning external repositories installation"
+		echo -e "\nBeginning external repositories installation"
 		sudo apt install extrepo -y && sudo extrepo enable librewolf
 	else
 		return 1
 	fi
 
 	if [[ $? -eq 0 ]]; then
-		echo -E "\nEnabled 'librewolf' package in the external repositories for installation.\nApplying changes."
+		echo -e "\nEnabled 'librewolf' package in the external repositories for installation.\nApplying changes."
 		sudo apt update
 	else
 		return 1
@@ -26,8 +26,8 @@ update_sys() {
 }
 
 install_packages() {
-	echo -E "\nInstalling packages"
-	sudo apt install awesome librewolf tilix kitty picom neovim flameshot thunar ranger gcc python3 fzf -y
+	echo -e "\nInstalling packages"
+	sudo apt install awesome librewolf tilix kitty picom neovim flameshot thunar ranger gcc python3 fzf btop -y
 	if [[ $? -ne 0 ]]; then		
 		return 1
 	fi
@@ -36,12 +36,12 @@ install_packages() {
 }
 
 copy_configurations() {
-	echo -E "\nConfiguring Awesome WM..."
+	echo -e "\nConfiguring Awesome WM..."
 	mkdir ~/.config/awesome &>/dev/null
 	cp -r awesome ~/.config/awesome
 
 	if [[ $? -eq 0 ]]; then
-		echo -E "\nConfiguring Kitty Terminal..."
+		echo -e "\nConfiguring Kitty Terminal..."
 		mkdir ~/.config/kitty &>/dev/null
 		cp -r kitty ~/.config/kitty
 	else
@@ -49,14 +49,14 @@ copy_configurations() {
 	fi
 
 	if [[ $? -eq 0 ]]; then
-		echo -E "Configuring bash prompt..."
+		echo -e "Configuring bash prompt..."
 		cp bashrc ~/.bashrc
 	else
 		return 1
 	fi
 
 	if [[ $? -eq 0 ]]; then
-		echo -E "Configuring window borders..."
+		echo -e "Configuring window borders..."
 		mkdir -p ~/.config/gtk-3.0/ &>/dev/null
 		cp gtk.css ~/.config/gtk-3.0/gtk.css
 	else
@@ -64,7 +64,7 @@ copy_configurations() {
 	fi
 
 	if [[ $? -eq 0 ]]; then
-		echo -E "Configuring NeoVim Text Editor..."
+		echo -e "Configuring NeoVim Text Editor..."
 		mkdir ~/.config/nvim &>/dev/null
 		cp -r nvim ~/.config/nvim
 	else
@@ -72,7 +72,7 @@ copy_configurations() {
 	fi
 
 	if [[ $? -eq 0 ]]; then
-		echo -E "Configuring Thunar File Explorer..."
+		echo -e "Configuring Thunar File Explorer..."
 		mkdir ~/.themes/ &>/dev/null
 		cp -r themes/* ~/.themes
 	else
@@ -80,14 +80,14 @@ copy_configurations() {
 	fi
 
 	if [[ $? -eq 0 ]]; then
-		echo -E "Configuring Btop process manager..."
+		echo -e "Configuring Btop process manager..."
 		cp -r btop ~/.config/btop
 	else
 		return 1
 	fi
 
 	if [[ $? -eq 0 ]]; then
-		echo -E "\nEnabling touchpad compatibility for laptops..."
+		echo -e "\nEnabling touchpad compatibility for laptops..."
 		mkdir -p /etc/X11/xorg.conf.d/ &>/dev/null
 		sudo cp 30-touchpad.conf /etc/X11/xorg.conf.d/30-touchpad.conf
 	else
@@ -95,7 +95,7 @@ copy_configurations() {
 	fi
 
 	if [[ $? -eq 0 ]]; then
-		echo -E "\nAdding Bash aliases..."
+		echo -e "\nAdding Bash aliases..."
 		cp bash_aliases ~/.bash_aliases
 	else
 		return 1
@@ -116,17 +116,17 @@ main() {
 			if [[ $? -eq 0 ]]; then
 				copy_configurations
 			else
-				echo -E "\nAn error occured while copying configurations. Aborting."
+				echo -e "\nAn error occured while copying configurations. Aborting."
 				return 1
 			fi
 		else
-			echo -E "\nCouldn't update system. Aborting installation."
+			echo -e "\nCouldn't update system. Aborting installation."
 			return 1
 		fi
 		chown -R $USER:$USER /home/$USER
-		echo -E "\nInstallation completed. Make sure to restart so the changes can apply."
+		echo -e "\nInstallation completed. Make sure to restart so the changes can apply."
 	else
-		echo -E "\nYou must run this script with root privileges."
+		echo -e "\nYou must run this script with root privileges."
 		return 1
 	fi
 }
