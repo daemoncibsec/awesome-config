@@ -28,7 +28,7 @@ update_sys() {
 install_packages() {
 	echo "\nInstalling packages"
 	sudo apt install awesome librewolf tilix kitty picom neovim flameshot thunar ranger gcc python3 fzf -y
-	if [[ $? -neq 0 ]]; then		
+	if [[ $? -ne 0 ]]; then		
 		return 1
 	fi
 
@@ -101,7 +101,7 @@ copy_configurations() {
 		return 1
 	fi
 
-	if [[ $? -neq 0 ]]; then		
+	if [[ $? -ne 0 ]]; then		
 		return 1
 	fi
 
