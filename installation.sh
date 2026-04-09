@@ -117,6 +117,7 @@ main() {
 	fi
 	if [[ $EUID -eq 0 ]]; then
 		check_user
+		# You must create this function
 		if [[ $EUID -eq 0 ]]; then
 			update_sys
 			if [[ $? -eq 0 ]]; then
