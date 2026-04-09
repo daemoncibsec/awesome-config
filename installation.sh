@@ -5,6 +5,7 @@ check_user () {
 	if [[ $1 == home_dir ]]; then
 		return 0
 	else
+		echo -e "The home directory for the user '$user' does not exist."
 		return 1
 	fi
 }
@@ -120,7 +121,7 @@ copy_configurations() {
 
 main() {
 	user=$1
-	if [[ $1 == "-h" || $1 == none ]]; then
+	if [[ $1 == "-h" || $1 -eq none ]]; then
 		echo -e "You must specify the user you want to install the desktop configuration to.\n"
 		return 0
 	fi
@@ -148,7 +149,6 @@ main() {
 			return 1
 		fi
 	else
-		echo -e "The home directory for the user '$user' does not exist."
 		return 1
 	fi
 }
